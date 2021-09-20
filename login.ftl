@@ -33,14 +33,6 @@
                     />
                 </div>
 
-                <#if recaptchaRequired??>
-                    <div class="form-group">
-                        <div class="${properties.kcInputWrapperClass!}">
-                            <div class="g-recaptcha" data-size="invisible" data-sitekey="${recaptchaSiteKey}"></div>
-                        </div>
-                    </div>
-                </#if>
-
                 <div class="${properties.kcFormGroupClass!} ${properties.kcFormSettingClass!}">
                     <div id="kc-form-options">
                         <#if realm.rememberMe && !usernameEditDisabled??>
@@ -60,12 +52,21 @@
                                 <span><a tabindex="5" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a></span>
                             </#if>
                         </div>
-
                   </div>
 
                   <div id="kc-form-buttons" class="${properties.kcFormGroupClass!}">
                       <input type="hidden" id="id-hidden-input" name="credentialId" <#if auth.selectedCredential?has_content>value="${auth.selectedCredential}"</#if>/>
-                      <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
+                    <#if recaptchaRequired??>
+                        <script>
+                            function onSubmit(token) {
+                                document.getElementById("kc-form-login").submit();
+                            }
+                        </script>
+                        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                        <button tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} g-recaptcha" name="login" id="kc-login" data-sitekey="${recaptchaSiteKey}" data-callback='onSubmit'>${msg("doLogIn")}</button>
+                    <#else>
+                        <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
+                    </#if>
                   </div>
             </form>
         </#if>

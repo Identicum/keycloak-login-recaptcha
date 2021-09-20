@@ -98,13 +98,6 @@ public class RecaptchaUsernamePasswordFormFactory  implements AuthenticatorFacto
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("Google Recaptcha Secret");
         CONFIG_PROPERTIES.add(property);
-
-        property = new ProviderConfigProperty();
-        property.setName(RecaptchaUsernamePasswordForm.USE_RECAPTCHA_NET);
-        property.setLabel("use recaptcha.net");
-        property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
-        property.setHelpText("Use recaptcha.net? (or else google.com)");
-        CONFIG_PROPERTIES.add(property);
     }
 
 	@Override
