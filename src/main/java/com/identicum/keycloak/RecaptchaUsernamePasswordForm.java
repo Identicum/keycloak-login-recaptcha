@@ -60,12 +60,13 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		form.setAttribute("recaptchaSiteKey", siteKey);
 		form.addScript("https://www." + getRecaptchaDomain(captchaConfig) + "/recaptcha/api.js?hl=" + userLanguageTag);
 
+		logger.info("Calling super.authenticate(AuthenticationFlowContext)");
 		super.authenticate(context);
 	}
 
 	@Override
 	public void action(AuthenticationFlowContext context) {
-		logger.debug("action(AuthenticationFlowContext) - start");
+		logger.info("action(AuthenticationFlowContext) - start");
 		MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
 		List<FormMessage> errors = new ArrayList<>();
 		boolean success = false;
@@ -85,7 +86,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 			formData.remove(G_RECAPTCHA_RESPONSE);
 			return;
 		}
-		logger.debug("action(AuthenticationFlowContext) - end");
+		logger.info("action(AuthenticationFlowContext) - end");
 	}
 
 	private String getRecaptchaDomain(AuthenticatorConfigModel config) {
@@ -100,6 +101,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 	}
 
 	protected boolean validateRecaptcha(AuthenticationFlowContext context, boolean success, String captcha, String secret) {
+		logger.info("validateRecaptcha() - start");
 		HttpClient httpClient = context.getSession().getProvider(HttpClientProvider.class).getHttpClient();
 		HttpPost post = new HttpPost("https://www." + getRecaptchaDomain(context.getAuthenticatorConfig()) + "/recaptcha/api/siteverify");
 		List<NameValuePair> formparams = new LinkedList<>();
@@ -121,6 +123,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		} catch (Exception e) {
 			ServicesLogger.LOGGER.recaptchaFailed(e);
 		}
+		logger.info("validateRecaptcha() - returning response.");
 		return success;
 	}
 
