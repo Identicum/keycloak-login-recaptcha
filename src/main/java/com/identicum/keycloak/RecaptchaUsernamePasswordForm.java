@@ -44,11 +44,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 	@Override
 	public void authenticate(AuthenticationFlowContext context) {
 		context.getEvent().detail(Details.AUTH_METHOD, "auth_method");
-		if (logger.isInfoEnabled()) {
-			logger.info(
-					"validateRecaptcha(AuthenticationFlowContext, boolean, String, String) - Before the validation");
-		}
-
+		logger.info("validateRecaptcha(AuthenticationFlowContext, boolean, String, String) - Before the validation");
 		AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 		LoginFormsProvider form = context.form();
 		String userLanguageTag = context.getSession().getContext().resolveLocale(context.getUser()).toLanguageTag();
@@ -69,9 +65,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 
 	@Override
 	public void action(AuthenticationFlowContext context) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("action(AuthenticationFlowContext) - start");
-		}
+		logger.debug("action(AuthenticationFlowContext) - start");
 		MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
 		List<FormMessage> errors = new ArrayList<>();
 		boolean success = false;
@@ -89,15 +83,9 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		} else {
 			errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
 			formData.remove(G_RECAPTCHA_RESPONSE);
-//			 context.error(Errors.INVALID_REGISTRATION);
-			// context.validationError(formData, errors);
-			// context.excludeOtherErrors();
 			return;
 		}
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("action(AuthenticationFlowContext) - end");
-		}
+		logger.debug("action(AuthenticationFlowContext) - end");
 	}
 
 	private String getRecaptchaDomain(AuthenticatorConfigModel config) {
@@ -108,7 +96,6 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		if (useRecaptcha) {
 			return "recaptcha.net";
 		}
-
 		return "google.com";
 	}
 
