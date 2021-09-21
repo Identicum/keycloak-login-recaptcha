@@ -1,4 +1,4 @@
-name: Publish package to GitHub Packages
+name: GitHub Packages
 on:
   push:
     branches:
@@ -18,4 +18,4 @@ jobs:
       - name: Publish package
         run: mvn --batch-mode deploy
         env:
-          GITHUB_TOKEN: ${{ secrets.PACKAGES_AUTOBUILD_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
