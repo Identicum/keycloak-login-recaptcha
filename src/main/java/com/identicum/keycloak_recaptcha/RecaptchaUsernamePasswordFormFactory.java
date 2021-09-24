@@ -1,4 +1,4 @@
-package com.identicum.keycloak;
+package com.identicum.keycloak_recaptcha;
 
 import java.util.ArrayList;
 import java.util.List;

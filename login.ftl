@@ -63,7 +63,7 @@
                             }
                         </script>
                         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-                        <button tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} g-recaptcha" name="login" id="kc-login" data-sitekey="${recaptchaSiteKey}" data-callback='onSubmit'>${msg("doLogIn")}</button>
+                        <button tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} g-recaptcha" name="login" id="kc-login" data-sitekey="${recaptchaSiteKey}" data-callback='onSubmit' data-action='submit'>${msg("doLogIn")}</button>
                     <#else>
                         <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" name="login" id="kc-login" type="submit" value="${msg("doLogIn")}"/>
                     </#if>
@@ -98,8 +98,7 @@
         <#if realm.password && realm.registrationAllowed && !registrationDisabled??>
             <div id="kc-registration-container">
                 <div id="kc-registration">
-                    <span>${msg("noAccount")} <a tabindex="6"
-                                                 href="${url.registrationUrl}">${msg("doRegister")}</a></span>
+                    <span>${msg("noAccount")} <a tabindex="6" href="${url.registrationUrl}">${msg("doRegister")}</a></span>
                 </div>
             </div>
         </#if>

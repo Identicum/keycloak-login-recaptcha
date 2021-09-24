@@ -1,4 +1,4 @@
-package com.identicum.keycloak;
+package com.identicum.keycloak_recaptcha;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -35,6 +35,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 
 	@Override
 	protected Response createLoginForm( LoginFormsProvider form ) {
+		logger.info("Creating login form with recaptcha for site key " + siteKey);
 		form.setAttribute("recaptchaRequired", true);
 		form.setAttribute("recaptchaSiteKey", siteKey);
 		return super.createLoginForm( form );
@@ -42,80 +43,82 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 
 	@Override
 	public void authenticate(AuthenticationFlowContext context) {
-		logger.info("authenticate() - getEvent().detail()");
+		logger.info("Starting authentication flow");
 		context.getEvent().detail(Details.AUTH_METHOD, "auth_method");
 		AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 		LoginFormsProvider form = context.form();
-
+		logger.info("Verifying recaptcha configuration");
 		if (captchaConfig == null || captchaConfig.getConfig() == null
 				|| captchaConfig.getConfig().get(SITE_KEY) == null
 				|| captchaConfig.getConfig().get(SITE_SECRET) == null) {
 			form.addError(new FormMessage(null, Messages.RECAPTCHA_NOT_CONFIGURED));
+			logger.error("Recaptcha configuration is not available");
 			return;
 		}
+		logger.info("Recaptcha configuration is available");
 		siteKey = captchaConfig.getConfig().get(SITE_KEY);
 		form.setAttribute("recaptchaRequired", true);
 		form.setAttribute("recaptchaSiteKey", siteKey);
 
-		logger.info("Calling super.authenticate()");
+		logger.debug("Calling authenticate method from parent class");
 		super.authenticate(context);
 	}
 
 	@Override
 	public void action(AuthenticationFlowContext context) {
-		logger.info("action() get formData");
 		MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-		logger.info("action() list errors");
 		List<FormMessage> errors = new ArrayList<>();
 		boolean success = false;
-		logger.info("action() - getEvent().detail()");
 		context.getEvent().detail(Details.AUTH_METHOD, "auth_method");
-		logger.info("action() get recaptcha response");
 		String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
-		logger.info("action() recaptcha response: " + captcha);
+		logger.debug("Recaptcha response from form data: " + captcha);
 
 		if (!Validation.isBlank(captcha)) {
 			AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 			String secret = captchaConfig.getConfig().get(SITE_SECRET);
-			logger.info("captcha secret: " + secret);
+			logger.info("Validating recaptcha response");
 			success = validateRecaptcha(context, success, captcha, secret);
 		}
 		if (success) {
-			logger.info("Success!");
+			logger.debug("Calling action method from parent class");
 			super.action(context);
 		} else {
 			errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
-			logger.info("Removing recaptcha response.");
+			logger.info("Removing recaptcha response");
 			formData.remove(G_RECAPTCHA_RESPONSE);
-			return;
 		}
-		logger.info("action() - end");
 	}
 
 	protected boolean validateRecaptcha(AuthenticationFlowContext context, boolean success, String captcha, String secret) {
-		logger.info("validateRecaptcha() - start");
 		HttpClient httpClient = HttpClients.createDefault();
-		HttpPost post = new HttpPost("https://www.google.com/recaptcha/api/siteverify");
+		String uri = "https://www.google.com/recaptcha/api/siteverify";
+		HttpPost post = new HttpPost(uri);
 		List<NameValuePair> formparams = new LinkedList<>();
 		formparams.add(new BasicNameValuePair("secret", secret));
 		formparams.add(new BasicNameValuePair("response", captcha));
 		formparams.add(new BasicNameValuePair("remoteip", context.getConnection().getRemoteAddr()));
+
 		try {
 			UrlEncodedFormEntity form = new UrlEncodedFormEntity(formparams, "UTF-8");
 			post.setEntity(form);
+			logger.info("Executing request to " + uri);
+			logger.debug("Executing request with parameters response: " + captcha + " and remoteip: " + context.getConnection().getRemoteAddr());
 			HttpResponse response = httpClient.execute(post);
 			InputStream content = response.getEntity().getContent();
 			try {
 				Map json = JsonSerialization.readValue(content, Map.class);
+				Object score = json.get("score");
+				logger.debug("Score: " + score);
 				Object val = json.get("success");
 				success = Boolean.TRUE.equals(val);
 			} finally {
 				content.close();
 			}
 		} catch (Exception e) {
+			logger.error("Recaptcha validation failed");
 			ServicesLogger.LOGGER.recaptchaFailed(e);
 		}
-		logger.info("validateRecaptcha() - returning response.");
+		logger.info("Recaptcha validation successful");
 		return success;
 	}
 

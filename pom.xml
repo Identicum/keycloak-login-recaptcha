@@ -4,7 +4,7 @@
     <name>Recaptcha Login</name>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.identicum.keycloak</groupId>
+    <groupId>com.identicum.keycloak_recaptcha</groupId>
     <artifactId>recaptcha-login-provider</artifactId>
     <version>0.1.0</version>
     <packaging>jar</packaging>

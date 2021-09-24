@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  keycloak:
+    image: jboss/keycloak:15.0.2
+    restart: always
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /tmp/realm.json
+      API_ENDPOINT: http://mmock:8083/api
+      API_MAX_CONNECTIONS: 3
+      API_SOCKET_TIMEOUT: 4500
+      API_CONNECT_TIMEOUT: 1000
+      API_CONNECTION_REQUEST_TIMEOUT: 1000
+    volumes:
+      - ./realm.json:/tmp/realm.json
+      - ./login.ftl:/opt/jboss/keycloak/themes/base/login/login.ftl
+      - ./target/recaptcha-login.jar:/opt/jboss/keycloak/standalone/deployments/recaptcha-login.jar
+    ports:
+      - 8080:8080
