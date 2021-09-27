@@ -1818,8 +1818,8 @@
         "id": "df7ce46f-7380-4ad0-8c30-c97b208b00bb",
         "alias": "recaptcha",
         "config": {
-          "site.key": "6LfvYYEcAAAAAIBB_ImdGAit9JvbqFhRH_fXkfIf",
-          "secret": "6LfvYYEcAAAAAFVKiFSzdaRtQsD2T24FtsCr6GFj"
+          "site.key": "XXXXXXXX",
+          "secret": "YYYYYYYYYY"
         }
       },
       {

@@ -3,14 +3,14 @@
     <name>Recaptcha Login</name>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.identicum.keycloak_recaptcha</groupId>
+    <groupId>com.identicum.keycloak.recaptcha</groupId>
     <artifactId>recaptcha-login-provider</artifactId>
     <version>0.2.0</version>
     <packaging>jar</packaging>
 
     <properties>
         <java.version>1.8</java.version>
-        <keycloak.version>13.0.0</keycloak.version>
+        <keycloak.version>15.0.2</keycloak.version>
         <jboss.logging.version>3.4.1.Final</jboss.logging.version>
     </properties>
 
