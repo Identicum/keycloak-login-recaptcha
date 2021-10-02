@@ -1,4 +1,4 @@
-package com.identicum.keycloak_recaptcha;
+package com.identicum.keycloak.recaptcha;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
