@@ -3,6 +3,7 @@ package com.identicum.keycloak_recaptcha;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
@@ -19,6 +20,7 @@ public class RecaptchaUsernamePasswordFormFactory  implements AuthenticatorFacto
 
     public static final String PROVIDER_ID = "recaptcha-u-p-form";
     public static final RecaptchaUsernamePasswordForm SINGLETON = new RecaptchaUsernamePasswordForm();
+    private static final Logger logger = Logger.getLogger(RecaptchaUsernamePasswordFormFactory.class);
 
     @Override
     public Authenticator create(KeycloakSession session) {
@@ -34,7 +36,7 @@ public class RecaptchaUsernamePasswordFormFactory  implements AuthenticatorFacto
 
     @Override
     public void init(Config.Scope config) {
-
+        logger.info("Package version: " + getClass().getPackage().getImplementationVersion());
     }
 
     @Override
