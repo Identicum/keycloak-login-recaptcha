@@ -10,20 +10,20 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-core:13.0.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-common:13.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-core:15.0.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-common:15.0.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sun.activation:jakarta.activation:1.2.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.bouncycastle:bcprov-jdk15on:1.68" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.bouncycastle:bcpkix-jdk15on:1.68" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-core:2.12.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.12.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-server-spi:13.0.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-server-spi-private:13.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-server-spi:15.0.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-server-spi-private:15.0.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.ua-parser:uap-java:1.4.3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.20" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.apache.commons:commons-collections4:4.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.jboss.logging:jboss-logging:3.4.1.Final" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-services:13.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.keycloak:keycloak-services:15.0.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sun.mail:jakarta.mail:1.6.5" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.glassfish:jakarta.json:1.1.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.twitter4j:twitter4j-core:4.0.7" level="project" />

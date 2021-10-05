@@ -48,17 +48,15 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 		LoginFormsProvider form = context.form();
 		logger.info("Verifying recaptcha configuration");
-		if (captchaConfig == null || captchaConfig.getConfig() == null
-				|| captchaConfig.getConfig().get(SITE_KEY) == null
-				|| captchaConfig.getConfig().get(SITE_SECRET) == null) {
-			form.addError(new FormMessage(null, Messages.RECAPTCHA_NOT_CONFIGURED));
-			logger.error("Recaptcha configuration is not available");
-			return;
+
+		if (captchaConfig != null && captchaConfig.getConfig() != null
+				&& captchaConfig.getConfig().get(SITE_KEY) != null
+				&& captchaConfig.getConfig().get(SITE_SECRET) != null) {
+			logger.info("Recaptcha configuration is available");
+			siteKey = captchaConfig.getConfig().get(SITE_KEY);
+			form.setAttribute("recaptchaRequired", true);
+			form.setAttribute("recaptchaSiteKey", siteKey);
 		}
-		logger.info("Recaptcha configuration is available");
-		siteKey = captchaConfig.getConfig().get(SITE_KEY);
-		form.setAttribute("recaptchaRequired", true);
-		form.setAttribute("recaptchaSiteKey", siteKey);
 
 		logger.debug("Calling authenticate method from parent class");
 		super.authenticate(context);
@@ -71,22 +69,21 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		boolean success = false;
 		context.getEvent().detail(Details.AUTH_METHOD, "auth_method");
 		String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
-		logger.debug("Recaptcha response from form data: " + captcha);
+		logger.info("Recaptcha response from form data: " + captcha);
 
 		if (!Validation.isBlank(captcha)) {
 			AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 			String secret = captchaConfig.getConfig().get(SITE_SECRET);
 			logger.info("Validating recaptcha response");
 			success = validateRecaptcha(context, success, captcha, secret);
+			if (!success) {
+				errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
+				logger.info("Removing recaptcha response");
+				formData.remove(G_RECAPTCHA_RESPONSE);
+			}
 		}
-		if (success) {
-			logger.debug("Calling action method from parent class");
-			super.action(context);
-		} else {
-			errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
-			logger.info("Removing recaptcha response");
-			formData.remove(G_RECAPTCHA_RESPONSE);
-		}
+		logger.debug("Calling action method from parent class");
+		super.action(context);
 	}
 
 	protected boolean validateRecaptcha(AuthenticationFlowContext context, boolean success, String captcha, String secret) {
