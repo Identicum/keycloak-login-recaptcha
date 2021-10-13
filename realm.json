@@ -1818,7 +1818,7 @@
         "id": "df7ce46f-7380-4ad0-8c30-c97b208b00bb",
         "alias": "recaptcha",
         "config": {
-          "site.key": "XXXXXXXX",
+          "siteKey": "XXXXXXXX",
           "secret": "YYYYYYYYYY"
         }
       },
