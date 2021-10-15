@@ -1818,7 +1818,11 @@
         "id": "df7ce46f-7380-4ad0-8c30-c97b208b00bb",
         "alias": "recaptcha",
         "config": {
+          "apiConnectTimeout": "1000",
+          "maxHttpConnections": "5",
           "siteKey": "XXXXXXXX",
+          "apiSocketTimeout": "1000",
+          "apiConnectionRequestTimeout": "1000",
           "secret": "YYYYYYYYYY"
         }
       },

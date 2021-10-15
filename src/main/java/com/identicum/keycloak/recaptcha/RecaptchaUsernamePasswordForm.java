@@ -82,9 +82,9 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		List<FormMessage> errors = new ArrayList<>();
 		context.getEvent().detail(Details.AUTH_METHOD, "auth_method");
 		String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
+		logger.debugv("Recaptcha response from form data: " + captcha);
 
 		if (!Validation.isBlank(captcha)) {
-			logger.debugv("Recaptcha response from form data: " + captcha);
 			AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 			String secret = captchaConfig.getConfig().get(SITE_SECRET);
 			logger.infov("Validating recaptcha response");
