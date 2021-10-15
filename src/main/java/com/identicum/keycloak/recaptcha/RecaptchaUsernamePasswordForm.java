@@ -36,7 +36,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 	private static final Logger logger = Logger.getLogger(RecaptchaUsernamePasswordForm.class);
 
 	private String siteKey;
-	private CloseableHttpClient httpClient;
+	private final CloseableHttpClient httpClient;
 
 	public RecaptchaUsernamePasswordForm(CloseableHttpClient httpClient){
 		this.httpClient = httpClient;
@@ -46,7 +46,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 	protected Response createLoginForm( LoginFormsProvider form ) {
 		logger.infov("Creating login form");
 		if(siteKey != null) {
-			logger.debug("For site key " + siteKey);
+			logger.debugv("For site key " + siteKey);
 			form.setAttribute("recaptchaRequired", true);
 			form.setAttribute("recaptchaSiteKey", siteKey);
 		}
@@ -60,17 +60,19 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 		LoginFormsProvider form = context.form();
 		logger.infov("Verifying recaptcha configuration");
+		String isRecaptchaConfAvailableMsg = "Recaptcha configuration is not available";
 
 		if (captchaConfig != null && captchaConfig.getConfig() != null
 				&& captchaConfig.getConfig().get(SITE_KEY) != null
 				&& captchaConfig.getConfig().get(SITE_SECRET) != null) {
-			logger.infov("Recaptcha configuration is available");
+			isRecaptchaConfAvailableMsg = "Recaptcha configuration is available";
 			siteKey = captchaConfig.getConfig().get(SITE_KEY);
 			form.setAttribute("recaptchaRequired", true);
 			form.setAttribute("recaptchaSiteKey", siteKey);
 		}
 
-		logger.debug("Calling authenticate method from parent class");
+		logger.infov(isRecaptchaConfAvailableMsg);
+		logger.debugv("Calling authenticate method from parent class");
 		super.authenticate(context);
 	}
 
@@ -80,12 +82,12 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		List<FormMessage> errors = new ArrayList<>();
 		context.getEvent().detail(Details.AUTH_METHOD, "auth_method");
 		String captcha = formData.getFirst(G_RECAPTCHA_RESPONSE);
-		logger.infov("Recaptcha response from form data: " + captcha);
 
 		if (!Validation.isBlank(captcha)) {
+			logger.debugv("Recaptcha response from form data: " + captcha);
 			AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 			String secret = captchaConfig.getConfig().get(SITE_SECRET);
-			logger.info("Validating recaptcha response");
+			logger.infov("Validating recaptcha response");
 			boolean success = validateRecaptcha(context, captcha, secret);
 			if (!success) {
 				errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
@@ -94,7 +96,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 				return;
 			}
 		}
-		logger.debug("Calling action method from parent class");
+		logger.infov("Calling action method from parent class");
 		super.action(context);
 	}
 

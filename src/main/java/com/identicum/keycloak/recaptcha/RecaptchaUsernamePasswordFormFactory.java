@@ -29,7 +29,13 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
     public static final String API_SOCKET_TIMEOUT = "apiSocketTimeout";
     public static final String API_CONNECT_TIMEOUT = "apiConnectTimeout";
     public static final String API_CONNECTION_REQUEST_TIMEOUT = "apiConnectionRequestTimeout";
+    private static final Integer MAX_HTTP_CONNECTIONS_VALUE = 5;
+    private static final Integer API_SOCKET_TIMEOUT_VALUE = 1000;
+    private static final Integer API_CONNECT_TIMEOUT_VALUE = 1000;
+    private static final Integer API_CONNECTION_REQUEST_TIMEOUT_VALUE = 1000;
+
     private static final Logger logger = Logger.getLogger(RecaptchaUsernamePasswordFormFactory.class);
+
     private CloseableHttpClient httpClient;
     private List<ProviderConfigProperty> lastConfiguration = null;
 
@@ -41,7 +47,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
             this.lastConfiguration = getConfigProperties();
         }
         else {
-            logger.infov("HttpClient already instantiated");
+            logger.debugv("HttpClient already instantiated");
         }
         return new RecaptchaUsernamePasswordForm(this.httpClient);
     }
@@ -57,10 +63,10 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
     public void init(Config.Scope config) {
         logger.infov("Initializing recaptcha username password form factory version: " + getClass().getPackage().getImplementationVersion());
 
-        int maxConnections = config.getInt(MAX_HTTP_CONNECTIONS, 5);
-        int socketTimeout = config.getInt(API_SOCKET_TIMEOUT, 1000);
-        int connectTimeout = config.getInt(API_CONNECT_TIMEOUT, 1000);
-        int connectionRequestTimeout = config.getInt(API_CONNECTION_REQUEST_TIMEOUT, 1000);
+        int maxConnections = config.getInt(MAX_HTTP_CONNECTIONS, MAX_HTTP_CONNECTIONS_VALUE);
+        int socketTimeout = config.getInt(API_SOCKET_TIMEOUT, API_SOCKET_TIMEOUT_VALUE);
+        int connectTimeout = config.getInt(API_CONNECT_TIMEOUT, API_CONNECT_TIMEOUT_VALUE);
+        int connectionRequestTimeout = config.getInt(API_CONNECTION_REQUEST_TIMEOUT, API_CONNECTION_REQUEST_TIMEOUT_VALUE);
         logger.infov("Initializing HTTP pool with maxConnections: {0}, connectionRequestTimeout: {1}, connectTimeout: {2}, socketTimeout: {3}", maxConnections, connectionRequestTimeout, connectTimeout, socketTimeout);
         PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = new PoolingHttpClientConnectionManager();
         poolingHttpClientConnectionManager.setMaxTotal(maxConnections);
@@ -150,28 +156,28 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
         property.setLabel("Max pool connections");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("Max http connections in pool");
-        property.setDefaultValue("5");
+        property.setDefaultValue(MAX_HTTP_CONNECTIONS_VALUE);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
         property.setName(API_SOCKET_TIMEOUT);
         property.setLabel("API Socket Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setDefaultValue("1000");
+        property.setDefaultValue(API_SOCKET_TIMEOUT_VALUE);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
         property.setName(API_CONNECT_TIMEOUT);
         property.setLabel("API Connect Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setDefaultValue("1000");
+        property.setDefaultValue(API_CONNECT_TIMEOUT_VALUE);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
         property.setName(API_CONNECTION_REQUEST_TIMEOUT);
         property.setLabel("API Connection Request Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setDefaultValue("1000");
+        property.setDefaultValue(API_CONNECTION_REQUEST_TIMEOUT_VALUE);
         CONFIG_PROPERTIES.add(property);
     }
 
