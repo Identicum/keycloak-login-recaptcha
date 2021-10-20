@@ -1,14 +1,10 @@
 package com.identicum.keycloak.recaptcha;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Timer;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.OAuth2Constants;
@@ -22,39 +18,31 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.provider.ProviderConfigProperty;
 
+import static com.identicum.keycloak.recaptcha.HttpStats.TO_MILLISECONDS;
+import static com.identicum.keycloak.recaptcha.RestConfiguration.API_CONNECTION_REQUEST_TIMEOUT;
+import static com.identicum.keycloak.recaptcha.RestConfiguration.API_CONNECT_TIMEOUT;
+import static com.identicum.keycloak.recaptcha.RestConfiguration.API_SOCKET_TIMEOUT;
+import static com.identicum.keycloak.recaptcha.RestConfiguration.MAX_HTTP_CONNECTIONS;
+import static com.identicum.keycloak.recaptcha.RestConfiguration.HTTP_STATS_INTERVAL;
+
 public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
 
-    public static final String PROVIDER_ID = "recaptcha-u-p-form";
-    public static final String MAX_HTTP_CONNECTIONS = "maxHttpConnections";
-    public static final String API_SOCKET_TIMEOUT = "apiSocketTimeout";
-    public static final String API_CONNECT_TIMEOUT = "apiConnectTimeout";
-    public static final String API_CONNECTION_REQUEST_TIMEOUT = "apiConnectionRequestTimeout";
-    private static final Integer MAX_HTTP_CONNECTIONS_VALUE = 5;
-    private static final Integer API_SOCKET_TIMEOUT_VALUE = 1000;
-    private static final Integer API_CONNECT_TIMEOUT_VALUE = 1000;
-    private static final Integer API_CONNECTION_REQUEST_TIMEOUT_VALUE = 1000;
-
+    private static final String PROVIDER_ID = "recaptcha-u-p-form";
     private static final Logger logger = Logger.getLogger(RecaptchaUsernamePasswordFormFactory.class);
 
-    private CloseableHttpClient httpClient;
-    private List<ProviderConfigProperty> lastConfiguration = null;
+    private static Map<String, String> lastConfiguration;
+    private static Timer httpStats;
+
+    protected static RestHandler restHandler;
 
     @Override
     public Authenticator create(KeycloakSession session) {
-
-        if(this.httpClient == null || !getConfigProperties().equals(lastConfiguration)){
-            logger.infov("Loading properties");
-            this.lastConfiguration = getConfigProperties();
-        }
-        else {
-            logger.debugv("HttpClient already instantiated");
-        }
-        return new RecaptchaUsernamePasswordForm(this.httpClient);
+        return new RecaptchaUsernamePasswordForm();
     }
 
     @Override
     public Authenticator createDisplay(KeycloakSession session, String displayType) {
-        if (displayType == null) return new RecaptchaUsernamePasswordForm(this.httpClient);
+        if (displayType == null) return new RecaptchaUsernamePasswordForm();
         if (!OAuth2Constants.DISPLAY_CONSOLE.equalsIgnoreCase(displayType)) return null;
         return ConsoleUsernamePasswordAuthenticator.SINGLETON;
     }
@@ -62,26 +50,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
     @Override
     public void init(Config.Scope config) {
         logger.infov("Initializing recaptcha username password form factory version: " + getClass().getPackage().getImplementationVersion());
-
-        int maxConnections = config.getInt(MAX_HTTP_CONNECTIONS, MAX_HTTP_CONNECTIONS_VALUE);
-        int socketTimeout = config.getInt(API_SOCKET_TIMEOUT, API_SOCKET_TIMEOUT_VALUE);
-        int connectTimeout = config.getInt(API_CONNECT_TIMEOUT, API_CONNECT_TIMEOUT_VALUE);
-        int connectionRequestTimeout = config.getInt(API_CONNECTION_REQUEST_TIMEOUT, API_CONNECTION_REQUEST_TIMEOUT_VALUE);
-        logger.infov("Initializing HTTP pool with maxConnections: {0}, connectionRequestTimeout: {1}, connectTimeout: {2}, socketTimeout: {3}", maxConnections, connectionRequestTimeout, connectTimeout, socketTimeout);
-        PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = new PoolingHttpClientConnectionManager();
-        poolingHttpClientConnectionManager.setMaxTotal(maxConnections);
-        poolingHttpClientConnectionManager.setDefaultMaxPerRoute(maxConnections);
-        poolingHttpClientConnectionManager.setDefaultSocketConfig(SocketConfig.custom()
-                .setSoTimeout(socketTimeout)
-                .build());
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(connectTimeout)
-                .setConnectionRequestTimeout(connectionRequestTimeout)
-                .build();
-        this.httpClient = HttpClients.custom()
-                .setDefaultRequestConfig(requestConfig)
-                .setConnectionManager(poolingHttpClientConnectionManager)
-                .build();
+        httpStats = new Timer();
     }
 
     @Override
@@ -89,15 +58,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
     }
 
     @Override
-    public void close() {
-        if( this.httpClient != null) {
-            try {
-                this.httpClient.close();
-            } catch (IOException e) {
-                logger.warn("Error closing http response", e);
-            }
-        }
-    }
+    public void close() {}
 
     @Override
     public String getId() {
@@ -115,7 +76,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
     }
     
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
-            AuthenticationExecutionModel.Requirement.REQUIRED
+        AuthenticationExecutionModel.Requirement.REQUIRED
     };
 
     @Override
@@ -131,6 +92,16 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
     @Override
     public String getHelpText() {
         return "Validates a username and password from login form + google recaptcha";
+    }
+
+    @Override
+    public List<ProviderConfigProperty> getConfigProperties() {
+        return CONFIG_PROPERTIES;
+    }
+
+    @Override
+    public boolean isUserSetupAllowed() {
+        return false;
     }
 
 	private static final List<ProviderConfigProperty> CONFIG_PROPERTIES = new ArrayList<>();
@@ -156,39 +127,61 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
         property.setLabel("Max pool connections");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("Max http connections in pool");
-        property.setDefaultValue(MAX_HTTP_CONNECTIONS_VALUE);
+        property.setDefaultValue(5);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
         property.setName(API_SOCKET_TIMEOUT);
         property.setLabel("API Socket Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setDefaultValue(API_SOCKET_TIMEOUT_VALUE);
+        property.setHelpText("Max time [milliseconds] to wait for response");
+        property.setDefaultValue(1000);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
         property.setName(API_CONNECT_TIMEOUT);
         property.setLabel("API Connect Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setDefaultValue(API_CONNECT_TIMEOUT_VALUE);
+        property.setHelpText("Max time [milliseconds] to establish the connection");
+        property.setDefaultValue(1000);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
         property.setName(API_CONNECTION_REQUEST_TIMEOUT);
         property.setLabel("API Connection Request Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setDefaultValue(API_CONNECTION_REQUEST_TIMEOUT_VALUE);
+        property.setHelpText("Max time [milliseconds] to wait until a connection in the pool is assigned to the requesting thread");
+        property.setDefaultValue(1000);
+        CONFIG_PROPERTIES.add(property);
+
+        property = new ProviderConfigProperty();
+        property.setName(HTTP_STATS_INTERVAL);
+        property.setLabel("HttpStats interval");
+        property.setType(ProviderConfigProperty.STRING_TYPE);
+        property.setHelpText("How often [seconds] will the HTTP connection pool stats be displayed. 0 means disabled.");
+        property.setDefaultValue(0);
         CONFIG_PROPERTIES.add(property);
     }
 
-	@Override
-	public List<ProviderConfigProperty> getConfigProperties() {
-        return CONFIG_PROPERTIES;
-	}
+    private static void setHttpStats(Logger logger, RestHandler restHandler, Integer httpStatsInterval){
+        httpStats.cancel();
+        if(httpStatsInterval > 0){
+            httpStats = new Timer();
+            httpStats.schedule(new HttpStats(logger, restHandler), 0, httpStatsInterval * TO_MILLISECONDS);
+        }
+    }
 
-    @Override
-    public boolean isUserSetupAllowed() {
-        return false;
+    protected static void createRestHandlerAndSetStats(Map<String, String> configuration){
+        if(restHandler == null || !configuration.equals(lastConfiguration)){
+            logger.infov("Creating a new instance of restHandler");
+            RestConfiguration restConfiguration = new RestConfiguration(configuration);
+            restHandler = new RestHandler(restConfiguration);
+            setHttpStats(logger, restHandler, restConfiguration.getHttpStatsInterval());
+            lastConfiguration = configuration;
+        }
+        else {
+            logger.infov("RestHandler already instantiated");
+        }
     }
 
 }

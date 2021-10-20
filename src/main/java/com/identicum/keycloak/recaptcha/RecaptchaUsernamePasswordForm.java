@@ -1,13 +1,5 @@
 package com.identicum.keycloak.recaptcha;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.ConnectionPoolTimeoutException;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -16,16 +8,11 @@ import org.keycloak.events.Details;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.utils.FormMessage;
-import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
-import org.keycloak.util.JsonSerialization;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.SocketTimeoutException;
 import java.util.*;
 
 public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implements Authenticator {
@@ -36,11 +23,6 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 	private static final Logger logger = Logger.getLogger(RecaptchaUsernamePasswordForm.class);
 
 	private String siteKey;
-	private final CloseableHttpClient httpClient;
-
-	public RecaptchaUsernamePasswordForm(CloseableHttpClient httpClient){
-		this.httpClient = httpClient;
-	}
 
 	@Override
 	protected Response createLoginForm( LoginFormsProvider form ) {
@@ -55,6 +37,8 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 
 	@Override
 	public void authenticate(AuthenticationFlowContext context) {
+		RecaptchaUsernamePasswordFormFactory.createRestHandlerAndSetStats(context.getAuthenticatorConfig().getConfig());
+
 		logger.infov("Starting authentication flow");
 		context.getEvent().detail(Details.AUTH_METHOD, "auth_method");
 		AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
@@ -88,7 +72,7 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 			AuthenticatorConfigModel captchaConfig = context.getAuthenticatorConfig();
 			String secret = captchaConfig.getConfig().get(SITE_SECRET);
 			logger.infov("Validating recaptcha response");
-			boolean success = validateRecaptcha(context, captcha, secret);
+			boolean success = RecaptchaUsernamePasswordFormFactory.restHandler.validateRecaptcha(context, captcha, secret);
 			if (!success) {
 				errors.add(new FormMessage(null, Messages.RECAPTCHA_FAILED));
 				logger.infov("Removing recaptcha response");
@@ -98,53 +82,6 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 		}
 		logger.infov("Calling action method from parent class");
 		super.action(context);
-	}
-
-	protected boolean validateRecaptcha(AuthenticationFlowContext context, String captcha, String secret) {
-		boolean success = false;
-		String uri = "https://www.google.com/recaptcha/api/siteverify";
-		HttpPost post = new HttpPost(uri);
-		List<NameValuePair> formparams = new LinkedList<>();
-		formparams.add(new BasicNameValuePair("secret", secret));
-		formparams.add(new BasicNameValuePair("response", captcha));
-		formparams.add(new BasicNameValuePair("remoteip", context.getConnection().getRemoteAddr()));
-
-		try {
-			UrlEncodedFormEntity form = new UrlEncodedFormEntity(formparams, "UTF-8");
-			post.setEntity(form);
-			logger.infov("Executing request to " + uri);
-			logger.debugv("Executing request with parameters response: " + captcha + " and remoteip: " + context.getConnection().getRemoteAddr());
-			HttpResponse response = this.httpClient.execute(post);
-			InputStream content = response.getEntity().getContent();
-			try {
-				Map json = JsonSerialization.readValue(content, Map.class);
-				Object score = json.get("score");
-				logger.debugv("Score: " + score);
-				Object val = json.get("success");
-				success = Boolean.TRUE.equals(val);
-			} finally {
-				content.close();
-			}
-		}
-		catch(ConnectionPoolTimeoutException cpte) {
-			logger.warnv("Connection pool timeout on recaptcha validation: {0}", cpte);
-			success = true;
-		}
-		catch(ConnectTimeoutException cte) {
-			logger.warnv("Connect timeout on recaptcha validation: {0}", cte);
-			success = true;
-		}
-		catch(SocketTimeoutException ste) {
-			logger.warnv("Socket timeout on recaptcha validation: {0}", ste);
-			success = true;
-		}
-		catch(IOException io) {
-			logger.error("Recaptcha validation failed");
-			ServicesLogger.LOGGER.recaptchaFailed(io);
-		}
-
-		logger.infov("Recaptcha validation successful");
-		return success;
 	}
 
 }

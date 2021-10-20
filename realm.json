@@ -1823,7 +1823,8 @@
           "siteKey": "XXXXXXXX",
           "apiSocketTimeout": "1000",
           "apiConnectionRequestTimeout": "1000",
-          "secret": "YYYYYYYYYY"
+          "secret": "YYYYYYYYYY",
+          "httpStatsInterval": "0"
         }
       },
       {
