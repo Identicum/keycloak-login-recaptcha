@@ -19,11 +19,7 @@ import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.provider.ProviderConfigProperty;
 
 import static com.identicum.keycloak.recaptcha.HttpStats.TO_MILLISECONDS;
-import static com.identicum.keycloak.recaptcha.RestConfiguration.API_CONNECTION_REQUEST_TIMEOUT;
-import static com.identicum.keycloak.recaptcha.RestConfiguration.API_CONNECT_TIMEOUT;
-import static com.identicum.keycloak.recaptcha.RestConfiguration.API_SOCKET_TIMEOUT;
-import static com.identicum.keycloak.recaptcha.RestConfiguration.MAX_HTTP_CONNECTIONS;
-import static com.identicum.keycloak.recaptcha.RestConfiguration.HTTP_STATS_INTERVAL;
+import static com.identicum.keycloak.recaptcha.RestConfiguration.*;
 
 public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactory, DisplayTypeAuthenticatorFactory {
 
