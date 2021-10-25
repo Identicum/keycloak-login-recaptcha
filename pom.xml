@@ -5,7 +5,7 @@
 
     <groupId>com.identicum.keycloak.recaptcha</groupId>
     <artifactId>recaptcha-login-provider</artifactId>
-    <version>0.2.3</version>
+    <version>0.2.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -48,7 +48,7 @@
     </dependencies>
     <scm>
 		<developerConnection>scm:git:https://github.com/identicum/keycloak-login-recaptcha</developerConnection>
-        <tag>recaptcha-login-provider-0.2.3</tag>
+        <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <repository>
