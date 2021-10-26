@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'pom.xml'
 jobs:
   analyze:
     name: Analyze
@@ -39,7 +42,7 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@identicum.com"
       - name: Get POM Version
-        run: echo ::set-output name=VERSION::$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout  && echo -n - && mvn help:evaluate -Dexpression=project.version -q -DforceStdout -DremoveSnapshot )
+        run: echo ::set-output name=VERSION::$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout  && echo -n - && mvn help:evaluate -Dexpression=project.version -q -DforceStdout | cut -d '-' -f 1 )
         id: get-pom-version
       - name: Get JAR path
         run: echo ::set-output name=JAR::$(echo -n target/ && mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout && echo -n .jar)
