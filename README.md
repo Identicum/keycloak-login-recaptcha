@@ -24,11 +24,11 @@ docker-compose up
   - enter the site key and secret you got in the registration process
 
 ## Test
-- Navigate to http://localhost:8080/auth/realms/recaptcha/account
+- Navigate to http://localhost:8080/auth/realms/demorealm/account
 - Select `Sign In`
 - Register a new user
 - Sign Out
-- Sign In again, as the newly registerd user
+- Sign In again, as the newly registered user
 
 ## How it works
 Class  `RecaptchaUsernamePasswordForm` sets the form parameter `recaptchaRequired` to `true`.
