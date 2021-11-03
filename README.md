@@ -26,21 +26,19 @@ docker-compose up
 ## Test
 - Navigate to http://localhost:8080/auth/realms/demorealm/account
 - Select `Sign In`
-- Register a new user
-- Sign Out
-- Sign In again, as the newly registered user
+- Sign in as user `demo` with password `demo`
 
 ## How it works
 Class  `RecaptchaUsernamePasswordForm` sets the form parameter `recaptchaRequired` to `true`.
 Block in ./login.ftl under `<#if recaptchaRequired??>` adds the necessary frontend pieces.
 
 ## Realm configuration
-A realm is automatically imported to simplify testing. This realm has the following configuration:
+A realm `demorealm` is automatically imported to simplify testing. This realm has the following configuration:
 - Realm Settings -> Security Defenses -> Headers
   - X-Frame-Options -> `ALLOW-FROM https://www.google.com`
   - Content-Security-Policy -> `frame-src 'self' https://www.google.com; frame-ancestors 'self'; object-src 'none';`
 - Authentication -> Flows
-  - New Authentication Flow `Recaptcha` with a single execution `Recaptcha Username Password Form`
+  - New Authentication Flow `recaptcha` with a single execution `Recaptcha Username Password Form`
    execution was creted
 - Authentication -> Flows -> Bindings
   - Browser Flow: `recaptcha`
