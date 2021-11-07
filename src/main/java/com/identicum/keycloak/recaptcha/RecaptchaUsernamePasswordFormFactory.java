@@ -168,7 +168,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
     }
 
     protected static void createRestHandlerAndSetStats(Map<String, String> configuration){
-        if(restHandler == null || !configuration.equals(lastConfiguration)){
+        if(restHandler == null || configuration == null || !configuration.equals(lastConfiguration)){
             logger.infov("Creating a new instance of restHandler");
             RestConfiguration restConfiguration = new RestConfiguration(configuration);
             restHandler = new RestHandler(restConfiguration);

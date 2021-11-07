@@ -37,7 +37,8 @@ public class RecaptchaUsernamePasswordForm extends UsernamePasswordForm implemen
 
 	@Override
 	public void authenticate(AuthenticationFlowContext context) {
-		RecaptchaUsernamePasswordFormFactory.createRestHandlerAndSetStats(context.getAuthenticatorConfig().getConfig());
+		Map<String, String> authConfig = context.getAuthenticatorConfig() == null ? null : context.getAuthenticatorConfig().getConfig();
+		RecaptchaUsernamePasswordFormFactory.createRestHandlerAndSetStats(authConfig);
 
 		logger.infov("Starting authentication flow");
 		context.getEvent().detail(Details.AUTH_METHOD, "auth_method");
