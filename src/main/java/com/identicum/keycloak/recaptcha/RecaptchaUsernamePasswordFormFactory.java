@@ -123,7 +123,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
         property.setLabel("Max pool connections");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("Max http connections in pool");
-        property.setDefaultValue(5);
+        property.setDefaultValue(MAX_HTTP_CONNECTIONS_VALUE);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
@@ -131,7 +131,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
         property.setLabel("API Socket Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("Max time [milliseconds] to wait for response");
-        property.setDefaultValue(1000);
+        property.setDefaultValue(API_SOCKET_TIMEOUT_VALUE);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
@@ -139,7 +139,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
         property.setLabel("API Connect Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("Max time [milliseconds] to establish the connection");
-        property.setDefaultValue(1000);
+        property.setDefaultValue(API_CONNECT_TIMEOUT_VALUE);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
@@ -147,7 +147,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
         property.setLabel("API Connection Request Timeout");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("Max time [milliseconds] to wait until a connection in the pool is assigned to the requesting thread");
-        property.setDefaultValue(1000);
+        property.setDefaultValue(API_CONNECTION_REQUEST_TIMEOUT_VALUE);
         CONFIG_PROPERTIES.add(property);
 
         property = new ProviderConfigProperty();
@@ -155,7 +155,7 @@ public class RecaptchaUsernamePasswordFormFactory implements AuthenticatorFactor
         property.setLabel("HttpStats interval");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("How often [seconds] will the HTTP connection pool stats be displayed. 0 means disabled.");
-        property.setDefaultValue(0);
+        property.setDefaultValue(HTTP_STATS_INTERVAL_VALUE);
         CONFIG_PROPERTIES.add(property);
     }
 

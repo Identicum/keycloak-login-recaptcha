@@ -13,6 +13,11 @@ public class RestConfiguration {
 	public static final String API_CONNECT_TIMEOUT = "apiConnectTimeout";
 	public static final String API_CONNECTION_REQUEST_TIMEOUT = "apiConnectionRequestTimeout";
 	public static final String HTTP_STATS_INTERVAL = "httpStatsInterval";
+	public static final String MAX_HTTP_CONNECTIONS_VALUE = "5";
+	public static final String API_SOCKET_TIMEOUT_VALUE = "1000";
+	public static final String API_CONNECT_TIMEOUT_VALUE = "1000";
+	public static final String API_CONNECTION_REQUEST_TIMEOUT_VALUE = "1000";
+	public static final String HTTP_STATS_INTERVAL_VALUE = "0";
 
 	private static final Logger logger = Logger.getLogger(RestConfiguration.class);
 
