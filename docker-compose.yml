@@ -2,7 +2,7 @@ version: '3'
 
 services:
   keycloak:
-    image: jboss/keycloak:15.0.2
+    image: quay.io/keycloak/keycloak:18.0.2-legacy
     restart: always
     environment:
       KEYCLOAK_USER: admin
